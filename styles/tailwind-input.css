@@ -35,11 +35,20 @@
     --fg: 28 25 23;           /* text */
     --muted: 87 83 78;        /* secondary text */
     --line: 231 229 228;      /* borders, dividers, skeletons */
-    --accent: 15 118 110;     /* the one accent */
-    --on-accent: 255 255 255; /* text on the accent */
+    --accent: 28 25 23;       /* the one accent: ink, so the tiers carry the colour */
+    --on-accent: 250 250 249; /* text on the accent */
     --danger: 185 28 28;
     --on-danger: 255 255 255;
-    --focus: 13 148 136;      /* the keyboard focus ring */
+    --focus: 37 99 235;       /* the keyboard focus ring and the drop highlight */
+    /* The tier ladder, S to F: the app's signature. Ink letters on each
+       (on-tier), the same in both looks. */
+    --tier-s: 255 138 128;
+    --tier-a: 255 183 112;
+    --tier-b: 250 214 102;
+    --tier-c: 180 222 110;
+    --tier-d: 120 200 230;
+    --tier-f: 184 170 230;
+    --on-tier: 28 25 23;
   }
   .dark {
     --ground: 12 10 9;
@@ -48,11 +57,18 @@
     --fg: 245 245 244;
     --muted: 168 162 158;
     --line: 68 64 60;
-    --accent: 45 212 191;
-    --on-accent: 4 47 46;
+    --accent: 245 245 244;
+    --on-accent: 12 10 9;
     --danger: 248 113 113;
     --on-danger: 69 10 10;
-    --focus: 94 234 212;
+    --focus: 96 165 250;
+    --tier-s: 255 138 128;
+    --tier-a: 255 183 112;
+    --tier-b: 250 214 102;
+    --tier-c: 180 222 110;
+    --tier-d: 120 200 230;
+    --tier-f: 184 170 230;
+    --on-tier: 28 25 23;
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */
@@ -122,5 +138,60 @@
   .state-empty,
   .state-error {
     @apply flex flex-col items-center gap-2 px-4 py-8 text-center;
+  }
+}
+
+/* ── This app's components ────────────────────────────────────────────────
+ * A thing to rank, the segmented switch between your tiers and everyone's,
+ * and the sheet things open in.
+ */
+@layer components {
+  /* A thing on the board or in the tray. Tap to open it; drag to place it. */
+  .tile {
+    @apply inline-flex min-h-11 min-w-11 max-w-full cursor-grab select-none items-center rounded-lg border border-line bg-surface px-3 py-2 text-left text-small font-medium text-fg
+      hover:bg-raised focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus;
+    touch-action: manipulation;
+    -webkit-touch-callout: none;
+  }
+  .tile-lifted {
+    @apply opacity-40;
+  }
+  /* The floating copy of a tile while it is dragged. */
+  .tile-ghost {
+    @apply pointer-events-none fixed left-0 top-0 z-50 ring-2 ring-focus;
+  }
+  /* A row or the tray while a tile is over it. */
+  .drop-active {
+    @apply bg-raised ring-2 ring-inset ring-focus;
+  }
+
+  /* Two views of one list: your tiers, and everyone's. */
+  .seg {
+    @apply inline-flex rounded-lg bg-raised p-1;
+  }
+  .seg-btn {
+    @apply min-h-11 rounded-md px-4 text-small font-medium text-muted
+      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus;
+  }
+  .seg-btn[aria-pressed="true"] {
+    @apply bg-surface text-fg;
+  }
+
+  /* A <dialog>: a bottom sheet on a phone, a centred panel from sm up. */
+  .sheet {
+    @apply w-full max-w-none border border-line bg-surface p-0 text-fg;
+    margin: auto auto 0;
+    max-height: 85vh;
+    border-radius: 1rem 1rem 0 0;
+  }
+  @media (min-width: 640px) {
+    .sheet {
+      margin: auto;
+      max-width: 28rem;
+      border-radius: 1rem;
+    }
+  }
+  .sheet::backdrop {
+    background: rgb(12 10 9 / 0.5);
   }
 }

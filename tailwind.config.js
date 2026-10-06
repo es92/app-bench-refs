@@ -55,6 +55,14 @@ module.exports = {
         danger: token('danger'),
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
+        // The tier ladder, S to F, and the ink its letters are set in.
+        'tier-s': token('tier-s'),
+        'tier-a': token('tier-a'),
+        'tier-b': token('tier-b'),
+        'tier-c': token('tier-c'),
+        'tier-d': token('tier-d'),
+        'tier-f': token('tier-f'),
+        'on-tier': token('on-tier'),
       },
       // The type scale: four sizes, and nothing in between.
       fontSize: {

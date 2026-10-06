@@ -100,22 +100,33 @@ tables you've marked private), etc.
 
 ## About Tier List
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+Rank things with friends. A tier list is a topic ("Bay Area restaurants");
+anyone can add things to it, and each person drags each thing into a tier
+from S down to F. Everyone sees three things: their own tiers, the crowd's
+(the average of everyone's votes), and, for any one thing, how each person
+voted on it.
 
 ## Design
 
 This app's look. The first real version fills in the blanks; every later
 change follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
+- **Palette:** neutrals are the kit's warm greys; the accent is ink (near
+  black in the light look, near white in the dark), so the only colour on
+  screen is the tier ladder. The ladder is six tokens, `tier-s` to `tier-f`
+  (coral, orange, amber, lime, sky, lilac), with ink letters (`on-tier`) on
+  each in both looks. The focus ring and the drop highlight are blue
+  (`focus`).
+- **Signature element:** the tier ladder itself: a full-height letter block
+  in its tier colour at the start of every row, repeated small in a thing's
+  vote breakdown and in the empty state.
 - **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+  (the kit's sizes, unchanged). Tier letters are `text-title` bold.
+- **Components:** `tile` (a thing: tap to open, drag to place), `seg` and
+  `seg-btn` (My tiers / Everyone), `sheet` (a `<dialog>`: a bottom sheet on a
+  phone, a centred panel from `sm`), plus the kit's own.
+- **Layout:** on a phone one board at a time, switched by the segmented
+  control; from `lg` your tiers and everyone's side by side.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -137,6 +148,14 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- A tier is stored as a score so it averages: 5 = S, 4 = A, 3 = B, 2 = C,
+  1 = D, 0 = F (`tier_votes.tier`). The letters and colours live in the
+  client (`TIERS` in `public/app.js`).
+- Every vote is public inside the app on purpose: "how everyone voted on a
+  thing" is a feature. All three tables are public.
+- The crowd's tier for a thing is the rounded average of everyone's votes.
+- Only the person who added a thing can remove it (its votes go with it).
+- Staging seeds two "Staging demo:" lists ranked by five fake
+  `staging-demo-*` people. `?demo=1` adds, read-only, the viewer's own
+  placements on the restaurant list so the populated board can be seen; it
+  never writes them.
