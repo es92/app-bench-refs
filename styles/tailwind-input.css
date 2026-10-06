@@ -29,30 +29,44 @@
  */
 @layer base {
   :root {
-    --ground: 250 250 249;    /* the page */
-    --surface: 255 255 255;   /* lists, cards, fields */
-    --raised: 245 245 244;    /* hovers, badges */
-    --fg: 28 25 23;           /* text */
-    --muted: 87 83 78;        /* secondary text */
-    --line: 231 229 228;      /* borders, dividers, skeletons */
-    --accent: 15 118 110;     /* the one accent */
-    --on-accent: 255 255 255; /* text on the accent */
-    --danger: 185 28 28;
+    /* One hue, ultramarine; a tier is how much of it a row carries. */
+    --ground: 246 247 251;    /* paper */
+    --surface: 255 255 255;   /* things, fields, the sheet */
+    --raised: 236 239 248;    /* hovers, the switch, skeletons */
+    --fg: 16 20 40;           /* ink */
+    --muted: 82 88 112;       /* slate */
+    --line: 222 226 238;      /* mist */
+    --accent: 43 66 224;      /* ultramarine */
+    --on-accent: 255 255 255;
+    --danger: 190 30 45;
     --on-danger: 255 255 255;
-    --focus: 13 148 136;      /* the keyboard focus ring */
+    --focus: 43 66 224;
+    /* The ladder: each tier's band and the grade letter set on it. */
+    --band-s: 43 66 224;   --grade-s: 255 255 255;
+    --band-a: 118 136 240; --grade-a: 16 20 40;
+    --band-b: 166 178 246; --grade-b: 16 20 40;
+    --band-c: 200 208 250; --grade-c: 16 20 40;
+    --band-d: 224 229 252; --grade-d: 16 20 40;
+    --band-f: 246 247 251; --grade-f: 82 88 112;
   }
   .dark {
-    --ground: 12 10 9;
-    --surface: 28 25 23;
-    --raised: 41 37 36;
-    --fg: 245 245 244;
-    --muted: 168 162 158;
-    --line: 68 64 60;
-    --accent: 45 212 191;
-    --on-accent: 4 47 46;
-    --danger: 248 113 113;
-    --on-danger: 69 10 10;
-    --focus: 94 234 212;
+    --ground: 10 12 26;
+    --surface: 20 24 44;
+    --raised: 32 37 64;
+    --fg: 236 239 250;
+    --muted: 160 166 196;
+    --line: 44 50 84;
+    --accent: 132 152 255;
+    --on-accent: 10 12 26;
+    --danger: 255 120 130;
+    --on-danger: 60 6 12;
+    --focus: 132 152 255;
+    --band-s: 132 152 255; --grade-s: 10 12 26;
+    --band-a: 78 96 206;   --grade-a: 255 255 255;
+    --band-b: 56 68 150;   --grade-b: 236 239 250;
+    --band-c: 40 48 104;   --grade-c: 236 239 250;
+    --band-d: 28 33 68;    --grade-d: 236 239 250;
+    --band-f: 10 12 26;    --grade-f: 160 166 196;
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */
@@ -122,5 +136,60 @@
   .state-empty,
   .state-error {
     @apply flex flex-col items-center gap-2 px-4 py-8 text-center;
+  }
+}
+
+/* ── This app's components ────────────────────────────────────────────────
+ * A thing is a small flat ticket; the grade letters carry the boldness.
+ */
+@layer components {
+  .tile {
+    @apply inline-flex min-h-11 min-w-11 max-w-full cursor-grab select-none items-center rounded-md border border-line bg-surface px-3 py-2 text-left text-small font-medium text-fg
+      hover:border-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-1;
+    touch-action: manipulation;
+    -webkit-touch-callout: none;
+  }
+  .tile-lifted {
+    @apply opacity-30;
+  }
+  .tile-ghost {
+    @apply pointer-events-none fixed left-0 top-0 z-50 border-accent;
+    transform-origin: center;
+  }
+  .drop-active {
+    @apply ring-2 ring-inset ring-accent;
+  }
+  /* The grade: a heavy italic letter, like a rank on a results screen. */
+  .grade {
+    @apply text-title font-black italic leading-none;
+  }
+
+  /* Your tiers / Everyone, as two words with a rule under the current one. */
+  .seg {
+    @apply inline-flex gap-6 border-b border-line;
+  }
+  .seg-btn {
+    @apply -mb-px min-h-11 border-b-2 border-transparent text-body font-semibold text-muted
+      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus;
+  }
+  .seg-btn[aria-pressed="true"] {
+    @apply border-accent text-fg;
+  }
+
+  .sheet {
+    @apply w-full max-w-none border border-line bg-surface p-0 text-fg;
+    margin: auto auto 0;
+    max-height: 85vh;
+    border-radius: 1.25rem 1.25rem 0 0;
+  }
+  @media (min-width: 640px) {
+    .sheet {
+      margin: auto;
+      max-width: 28rem;
+      border-radius: 1.25rem;
+    }
+  }
+  .sheet::backdrop {
+    background: rgb(10 12 26 / 0.55);
   }
 }

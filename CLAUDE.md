@@ -100,22 +100,46 @@ tables you've marked private), etc.
 
 ## About Tier List
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+Rank things with friends. A tier list is a topic ("Bay Area restaurants");
+anyone can add things to it, and each person drags each thing into a tier
+from S down to F. Everyone sees three things: their own tiers, the crowd's
+(the average of everyone's votes), and, for any one thing, how each person
+voted on it.
 
 ## Design
 
 This app's look. The first real version fills in the blanks; every later
 change follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+The plan behind it (from the `frontend-design` skill). The subject is friends
+settling arguments about taste ("that taqueria is S tier"); the audience is a
+group on their phones, a few minutes at a time; the job is to put a thing in a
+tier in one gesture and see where you stand against the crowd. The default
+look for a tier list is a rainbow ladder (red S down to purple F); that was
+rejected for one hue whose strength says the rank.
+
+- **Palette:** one hue, ultramarine (`accent`), on cool paper (`ground`) with
+  ink text (`fg`), slate secondary text (`muted`) and mist lines (`line`).
+  A tier is how much ultramarine its row carries: `band-s` is solid, then
+  each tier lighter, down to `band-f`, which is the page itself. Each band
+  has its own letter colour (`grade-s` to `grade-f`), checked at 4.5:1 or
+  more in both looks. The dark look inverts the ramp's lightness, not its
+  order: S is still the strongest.
+- **Signature element:** the grades. Each row starts with its tier letter as
+  a heavy italic (`grade`: `text-title`, black weight, italic), like a rank
+  on a results screen, and the solid S band is the one loud thing on the
+  page. Everything else (things, fields, sheets) stays flat and quiet.
+- **Type scale:** `text-title` is larger and tighter than the kit's
+  (2.25rem, weight 800, slight negative tracking) so the list's name and the
+  grades carry the personality; `text-heading`, `text-body`, `text-small`
+  as the kit's. System sans throughout; no other typeface.
+- **Components:** `tile` (a thing: a small flat white ticket, tap to open,
+  drag to place), `grade`, `seg` and `seg-btn` (My tiers / Everyone as two
+  words with a rule under the current one), `sheet` (a `<dialog>`: a bottom
+  sheet on a phone, a centred panel from `sm`).
+- **Layout:** on a phone one board at a time; from `lg` your tiers and
+  everyone's side by side. Things never get shadows; one radius per kind
+  (tickets `rounded-md`, boards `rounded-2xl`, sheets larger).
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -137,6 +161,14 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- A tier is stored as a score so it averages: 5 = S, 4 = A, 3 = B, 2 = C,
+  1 = D, 0 = F (`tier_votes.tier`). The letters and colours live in the
+  client (`TIERS` in `public/app.js`).
+- Every vote is public inside the app on purpose: "how everyone voted on a
+  thing" is a feature. All three tables are public.
+- The crowd's tier for a thing is the rounded average of everyone's votes.
+- Only the person who added a thing can remove it (its votes go with it).
+- Staging seeds two "Staging demo:" lists ranked by five fake
+  `staging-demo-*` people. `?demo=1` adds, read-only, the viewer's own
+  placements on the restaurant list so the populated board can be seen; it
+  never writes them.

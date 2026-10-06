@@ -1,6 +1,32 @@
 {
+  "description": "Rank things with friends, from S tier down, and see the crowd's tier list.",
   "icon": {
     "emoji": "🏆"
   },
-  "secrets": []
+  "secrets": [],
+  "tests": [
+    {
+      "id": "board.mine",
+      "name": "Your tier board",
+      "path": "/?demo=1",
+      "expectSelector": "#board-mine [data-drop-tier=\"5\"] [data-item-id]",
+      "visual": true,
+      "impact": [
+        "public/**",
+        "styles/**",
+        "tailwind.config.js",
+        "server.js"
+      ]
+    },
+    {
+      "name": "Everyone's tiers",
+      "path": "/?demo=1#/list/970001/everyone",
+      "expectSelector": "#board-everyone [data-tier=\"5\"] [data-item-id]"
+    },
+    {
+      "name": "A first visit has things to rank",
+      "path": "/",
+      "expectText": "To rank"
+    }
+  ]
 }

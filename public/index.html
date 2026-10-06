@@ -108,156 +108,170 @@
   </script>
 </head>
 <body class="min-h-screen bg-ground text-fg">
-  <!-- Built from the design kit in styles/tailwind-input.css: colour tokens
-       (bg-ground, text-muted, bg-accent, ...) that are right in both looks,
-       and components (btn-primary, list, card, state-empty, ...). The real
-       app keeps the kit; CLAUDE.md's "## Design" says how. -->
-  <main class="mx-auto flex max-w-md flex-col gap-8 px-4 py-10">
+  <div id="app" class="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-5 px-4 pb-24 pt-4 sm:px-6 sm:pt-6">
 
-    <!-- usernode-starter-notice@1 — starter-template messaging. When building
-         the user's real app, replace this whole screen and delete this block,
-         both sentinel comments included. -->
-    <section class="card flex flex-col items-start gap-3">
-      <span class="rounded-full bg-raised px-3 py-1 text-small font-medium text-muted">Starter template</span>
-      <h1 class="text-title">Tier List</h1>
-      <p class="text-body text-muted">Welcome to your new app! Everything on this screen is placeholder content that came with it.</p>
-      <p class="text-body text-muted">To change this app, ask Homeroom bot: tap the <strong class="font-semibold text-fg">Homeroom icon</strong>, then <strong class="font-semibold text-fg">Suggest an improvement</strong>. Describe what you'd like in plain English, and it will be turned into your real app.</p>
-    </section>
+    <!-- Loading: the board's shape, before anything has arrived. Shown by
+         default so the very first paint is never blank. -->
+    <div id="state-loading" role="status" class="flex flex-col gap-5">
+      <span class="sr-only">Loading your tier lists</span>
+      <div class="flex flex-col gap-2">
+        <div class="skeleton h-10 w-64"></div>
+        <div class="skeleton h-4 w-40"></div>
+      </div>
+      <div class="skeleton h-11 w-48"></div>
+      <div class="overflow-hidden rounded-2xl border border-line">
+        <div class="flex min-h-16 items-stretch bg-band-s"><div class="w-16 shrink-0"></div><div class="flex flex-1 items-center gap-2 p-2"><div class="skeleton h-9 w-24 bg-surface opacity-60"></div><div class="skeleton h-9 w-32 bg-surface opacity-60"></div></div></div>
+        <div class="flex min-h-16 items-stretch bg-band-a"><div class="w-16 shrink-0"></div><div class="flex flex-1 items-center gap-2 p-2"><div class="skeleton h-9 w-28 bg-surface opacity-60"></div></div></div>
+        <div class="flex min-h-16 items-stretch bg-band-b"><div class="w-16 shrink-0"></div><div class="flex flex-1 items-center gap-2 p-2"><div class="skeleton h-9 w-20 bg-surface opacity-60"></div><div class="skeleton h-9 w-24 bg-surface opacity-60"></div></div></div>
+        <div class="flex min-h-16 items-stretch bg-band-c"><div class="w-16 shrink-0"></div><div class="flex flex-1 items-center gap-2 p-2"></div></div>
+        <div class="flex min-h-16 items-stretch bg-band-d"><div class="w-16 shrink-0"></div><div class="flex flex-1 items-center gap-2 p-2"><div class="skeleton h-9 w-24"></div></div></div>
+        <div class="flex min-h-16 items-stretch bg-band-f"><div class="w-16 shrink-0"></div><div class="flex flex-1 items-center gap-2 p-2"></div></div>
+      </div>
+    </div>
 
-    <section>
-      <h2 class="section-label">What's already working</h2>
-      <ul class="list">
-        <li class="list-row items-start">
-          <svg class="mt-0.5 h-5 w-5 shrink-0 text-accent" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.7 5.3a1 1 0 0 1 0 1.4l-7 7a1 1 0 0 1-1.4 0l-3-3a1 1 0 1 1 1.4-1.4L9 11.6l6.3-6.3a1 1 0 0 1 1.4 0Z" clip-rule="evenodd"/></svg>
-          <div>
-            <p class="text-body font-medium">Sign-in</p>
-            <p class="text-small text-muted">You're signed in through Homeroom automatically, with no accounts to build.</p>
-          </div>
-        </li>
-        <li class="list-row items-start">
-          <svg class="mt-0.5 h-5 w-5 shrink-0 text-accent" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.7 5.3a1 1 0 0 1 0 1.4l-7 7a1 1 0 0 1-1.4 0l-3-3a1 1 0 1 1 1.4-1.4L9 11.6l6.3-6.3a1 1 0 0 1 1.4 0Z" clip-rule="evenodd"/></svg>
-          <div>
-            <p class="text-body font-medium">Database</p>
-            <p class="text-small text-muted">Your app has its own private database, ready to store things.</p>
-          </div>
-        </li>
-        <li class="list-row items-start">
-          <svg class="mt-0.5 h-5 w-5 shrink-0 text-accent" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.7 5.3a1 1 0 0 1 0 1.4l-7 7a1 1 0 0 1-1.4 0l-3-3a1 1 0 1 1 1.4-1.4L9 11.6l6.3-6.3a1 1 0 0 1 1.4 0Z" clip-rule="evenodd"/></svg>
-          <div>
-            <p class="text-body font-medium">Live API</p>
-            <p class="text-small text-muted">The example below talks to a real server. Try it.</p>
-          </div>
-        </li>
-      </ul>
-    </section>
-    <!-- /usernode-starter-notice@1 -->
+    <!-- Error: the lists did not load. -->
+    <div id="state-error" class="state-error my-auto" hidden>
+      <svg class="h-8 w-8 text-danger" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-8-5a1 1 0 0 1 1 1v4a1 1 0 1 1-2 0V6a1 1 0 0 1 1-1Zm0 10a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd"/></svg>
+      <h1 class="text-heading">Couldn't load the tier lists</h1>
+      <p class="max-w-sm text-body text-muted">Your rankings are saved. This is a problem reaching them, so check your connection and try again.</p>
+      <button id="error-retry" type="button" class="btn-secondary mt-2">Try again</button>
+    </div>
 
-    <section class="flex flex-col items-center gap-5">
-      <div class="w-full px-1">
-        <h2 class="text-heading">Try the example</h2>
-        <p class="text-small text-muted">This example will be replaced</p>
+    <!-- Empty: no tier list exists yet. -->
+    <div id="state-start" class="my-auto flex flex-col items-center gap-6 py-8 text-center" hidden>
+      <div class="w-56 overflow-hidden rounded-xl border border-line text-left" aria-hidden="true">
+        <div class="flex h-12 items-center gap-3 bg-band-s px-4"><span class="grade text-grade-s">S</span><span class="h-6 w-24 rounded-md bg-surface"></span></div>
+        <div class="flex h-12 items-center gap-3 bg-band-a px-4"><span class="grade text-grade-a">A</span><span class="h-6 w-16 rounded-md bg-surface"></span></div>
+        <div class="flex h-12 items-center gap-3 bg-band-b px-4"><span class="grade text-grade-b">B</span></div>
+      </div>
+      <div class="flex max-w-sm flex-col gap-2">
+        <h1 class="text-title">Start a tier list</h1>
+        <p class="text-body text-muted">Pick something to rank, add a few things, and everyone sorts them from S down to F. You'll see your tiers, the crowd's, and how each person voted.</p>
+      </div>
+      <form id="start-form" class="flex w-full max-w-sm flex-col gap-2" novalidate>
+        <label for="start-title" class="text-left text-small font-medium">What are you ranking?</label>
+        <input id="start-title" name="title" class="field" maxlength="80" autocomplete="off" placeholder="e.g. Bay Area restaurants">
+        <p id="start-error" class="text-small text-danger" hidden></p>
+        <button type="submit" class="btn-primary mt-1">Create tier list</button>
+      </form>
+    </div>
+
+    <!-- The board: one tier list, yours and everyone's. -->
+    <div id="state-board" class="flex flex-col gap-5" hidden>
+      <header class="flex flex-col gap-1">
+        <button id="list-switch" type="button" class="-ml-2 flex min-h-11 max-w-full items-start gap-1 self-start rounded-lg px-2 py-1 text-left hover:bg-raised focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus" aria-haspopup="dialog">
+          <h1 id="list-title" class="line-clamp-3 break-words text-title"></h1>
+          <svg class="mt-1.5 h-6 w-6 shrink-0 text-muted" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.2 7.2a1 1 0 0 1 1.4 0L10 10.6l3.4-3.4a1 1 0 1 1 1.4 1.4l-4.1 4.1a1 1 0 0 1-1.4 0L5.2 8.6a1 1 0 0 1 0-1.4Z" clip-rule="evenodd"/></svg>
+          <span class="sr-only">Switch tier list</span>
+        </button>
+        <p id="list-meta" class="text-small text-muted"></p>
+      </header>
+
+      <div class="seg self-start lg:hidden" role="group" aria-label="Whose tiers">
+        <button type="button" class="seg-btn" data-view="mine" aria-pressed="true">My tiers</button>
+        <button type="button" class="seg-btn" data-view="everyone" aria-pressed="false">Everyone</button>
       </div>
 
-      <button id="press-btn" class="btn-primary h-32 w-32 rounded-full text-title active:scale-95">Press!</button>
+      <div class="grid items-start gap-8 lg:grid-cols-2">
+        <section id="mine-panel" class="flex flex-col gap-4" aria-labelledby="mine-heading">
+          <h2 id="mine-heading" class="sr-only text-heading lg:not-sr-only">My tiers</h2>
 
-      <p id="count" class="min-h-6 text-body text-muted"></p>
+          <div id="tray" class="flex flex-col gap-3 rounded-xl p-1" data-drop-tier="none">
+            <div class="flex items-baseline justify-between gap-3 px-1">
+              <h3 id="tray-heading" class="text-body font-semibold">To rank</h3>
+              <p id="tray-hint" class="text-small text-muted">Drag into a tier, or tap to choose</p>
+            </div>
+            <ul id="tray-items" class="flex gap-2 overflow-x-auto px-1 pb-1 sm:flex-wrap sm:overflow-visible" aria-labelledby="tray-heading"></ul>
+            <p id="tray-done" class="px-1 text-small text-muted" hidden>You've ranked everything on this list.</p>
+            <form id="add-form" class="flex gap-2 px-1" novalidate>
+              <label for="add-name" class="sr-only">Add something to rank</label>
+              <input id="add-name" name="name" class="field" maxlength="80" autocomplete="off" placeholder="Add something to rank">
+              <button type="submit" class="btn-primary shrink-0">Add</button>
+            </form>
+            <p id="add-error" class="px-1 text-small text-danger" hidden></p>
+          </div>
 
-      <div class="w-full">
-        <h3 class="section-label">Leaderboard</h3>
-        <!-- Anything that loads data shows exactly one of these at a time:
-             loading, the data, empty (it loaded, and there is nothing yet)
-             or error (it did not load). The script below switches them. -->
-        <div id="leaderboard-loading" role="status">
-          <span class="sr-only">Loading the leaderboard</span>
-          <div class="list">
-            <div class="list-row"><div class="skeleton h-4 w-1/2"></div></div>
-            <div class="list-row"><div class="skeleton h-4 w-1/3"></div></div>
-            <div class="list-row"><div class="skeleton h-4 w-2/5"></div></div>
+          <div id="board-mine" class="overflow-hidden rounded-2xl border border-line" aria-label="My tiers"></div>
+        </section>
+
+        <section id="everyone-panel" class="flex flex-col gap-4 max-lg:hidden" aria-labelledby="everyone-heading">
+          <div class="flex items-baseline justify-between gap-3">
+            <h2 id="everyone-heading" class="sr-only text-heading lg:not-sr-only">Everyone</h2>
+            <p id="everyone-meta" class="text-small text-muted"></p>
+          </div>
+          <div id="board-everyone" class="overflow-hidden rounded-2xl border border-line" aria-label="Everyone's tiers"></div>
+          <p id="everyone-empty" class="text-small text-muted" hidden>Nobody has ranked anything yet. Your tiers will show up here as soon as you place something.</p>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <!-- One thing: how everyone voted on it, and your tier for it. -->
+  <dialog id="thing-sheet" class="sheet" aria-labelledby="thing-name">
+    <div class="flex max-h-full flex-col gap-5 overflow-y-auto p-5">
+      <div class="flex items-start justify-between gap-3">
+        <div class="flex min-w-0 flex-col gap-1">
+          <h2 id="thing-name" class="text-heading"></h2>
+          <p id="thing-added" class="text-small text-muted"></p>
+        </div>
+        <button type="button" class="btn-secondary shrink-0 px-3" data-close aria-label="Close">
+          <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M5.3 5.3a1 1 0 0 1 1.4 0L10 8.6l3.3-3.3a1 1 0 1 1 1.4 1.4L11.4 10l3.3 3.3a1 1 0 0 1-1.4 1.4L10 11.4l-3.3 3.3a1 1 0 0 1-1.4-1.4L8.6 10 5.3 6.7a1 1 0 0 1 0-1.4Z"/></svg>
+        </button>
+      </div>
+
+      <section class="flex flex-col gap-2" aria-labelledby="your-tier-label">
+        <h3 id="your-tier-label" class="section-label mb-0 px-0">Your tier</h3>
+        <div id="thing-pick" class="grid grid-cols-6 gap-2" role="group" aria-labelledby="your-tier-label"></div>
+        <button id="thing-clear" type="button" class="min-h-11 self-start rounded-lg px-1 text-small font-medium text-muted underline-offset-4 hover:underline" hidden>Take it out of my tiers</button>
+      </section>
+
+      <section class="flex flex-col gap-3" aria-labelledby="crowd-label">
+        <h3 id="crowd-label" class="section-label mb-0 px-0">Everyone</h3>
+        <div class="flex items-center gap-4">
+          <span id="thing-crowd-tier" class="grade flex h-16 w-16 shrink-0 items-center justify-center rounded-xl"></span>
+          <div class="flex min-w-0 flex-col">
+            <p id="thing-crowd-line" class="text-body font-medium"></p>
+            <p id="thing-crowd-sub" class="text-small text-muted"></p>
           </div>
         </div>
-        <ol id="leaderboard" class="list" hidden></ol>
-        <div id="leaderboard-empty" class="state-empty" hidden>
-          <p class="text-heading">No presses yet</p>
-          <p class="text-body text-muted">Press the button to put your name on the board.</p>
-          <button id="leaderboard-press" class="btn-secondary">Press it</button>
-        </div>
-        <div id="leaderboard-error" class="state-error" hidden>
-          <svg class="h-6 w-6 text-danger" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-8-5a1 1 0 0 1 1 1v4a1 1 0 1 1-2 0V6a1 1 0 0 1 1-1Zm0 10a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd"/></svg>
-          <p class="text-heading">Couldn't load the leaderboard</p>
-          <p class="text-body text-muted">Pressing still works, and every press is saved.</p>
-          <button id="leaderboard-retry" class="btn-secondary">Retry</button>
-        </div>
+        <div id="thing-bars" class="grid grid-cols-6 items-end gap-2" aria-hidden="true"></div>
+      </section>
+
+      <section class="flex flex-col gap-2" aria-labelledby="votes-label">
+        <h3 id="votes-label" class="section-label mb-0 px-0">How everyone voted</h3>
+        <ul id="thing-votes" class="flex flex-col"></ul>
+        <p id="thing-novotes" class="text-small text-muted" hidden>Nobody has ranked this yet. Pick a tier above to be the first.</p>
+      </section>
+
+      <button id="thing-remove" type="button" class="min-h-11 self-start rounded-lg px-1 text-small font-medium text-danger underline-offset-4 hover:underline" hidden>Remove from this list</button>
+    </div>
+  </dialog>
+
+  <!-- Every tier list, and a new one. -->
+  <dialog id="lists-sheet" class="sheet" aria-labelledby="lists-heading">
+    <div class="flex max-h-full flex-col gap-4 overflow-y-auto p-5">
+      <div class="flex items-center justify-between gap-3">
+        <h2 id="lists-heading" class="text-heading">Tier lists</h2>
+        <button type="button" class="btn-secondary px-3" data-close aria-label="Close">
+          <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M5.3 5.3a1 1 0 0 1 1.4 0L10 8.6l3.3-3.3a1 1 0 1 1 1.4 1.4L11.4 10l3.3 3.3a1 1 0 0 1-1.4 1.4L10 11.4l-3.3 3.3a1 1 0 0 1-1.4-1.4L8.6 10 5.3 6.7a1 1 0 0 1 0-1.4Z"/></svg>
+        </button>
       </div>
-    </section>
+      <ul id="lists-items" class="list"></ul>
+      <form id="new-list-form" class="flex flex-col gap-2" novalidate>
+        <label for="new-list-title" class="text-small font-medium">New tier list</label>
+        <div class="flex gap-2">
+          <input id="new-list-title" name="title" class="field" maxlength="80" autocomplete="off" placeholder="What are you ranking?">
+          <button type="submit" class="btn-primary shrink-0">Create</button>
+        </div>
+        <p id="new-list-error" class="text-small text-danger" hidden></p>
+      </form>
+    </div>
+  </dialog>
 
-    <p class="text-center text-small text-muted">Built on Homeroom. This template screen disappears once you build your real app.</p>
-  </main>
+  <div id="toast" role="status" aria-live="polite" class="pointer-events-none fixed inset-x-0 bottom-6 z-40 flex justify-center px-4" hidden>
+    <p id="toast-text" class="rounded-lg bg-accent px-4 py-3 text-small font-medium text-on-accent"></p>
+  </div>
 
-  <script>
-    const params = new URLSearchParams(window.location.search);
-    const token = params.get('token') || '';
-    const headers = token ? { 'x-usernode-token': token } : {};
-    const count = document.getElementById('count');
-
-    // The leaderboard's states, one shown at a time. Empty only when the
-    // load worked and found nothing; a failure is the error state, never
-    // "No presses yet".
-    const views = {
-      loading: document.getElementById('leaderboard-loading'),
-      list: document.getElementById('leaderboard'),
-      empty: document.getElementById('leaderboard-empty'),
-      error: document.getElementById('leaderboard-error'),
-    };
-    function show(state) {
-      for (const [name, el] of Object.entries(views)) el.hidden = name !== state;
-    }
-
-    async function loadLeaderboard() {
-      let leaderboard;
-      try {
-        const res = await fetch('/api/leaderboard', { headers });
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        ({ leaderboard } = await res.json());
-      } catch {
-        show('error');
-        return;
-      }
-      // People's names go in as text, never as HTML.
-      views.list.replaceChildren(...leaderboard.map((r, i) => {
-        const row = document.createElement('li');
-        row.className = 'list-row justify-between';
-        const name = document.createElement('span');
-        name.textContent = (i + 1) + '. ' + r.username;
-        const presses = document.createElement('span');
-        presses.className = 'tabular-nums text-muted';
-        presses.textContent = r.presses;
-        row.append(name, presses);
-        return row;
-      }));
-      const total = leaderboard.reduce((s, r) => s + parseInt(r.presses, 10), 0);
-      count.textContent = total + (total === 1 ? ' press so far' : ' presses so far');
-      show(leaderboard.length ? 'list' : 'empty');
-    }
-
-    async function press() {
-      try {
-        const res = await fetch('/api/press', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', ...headers },
-        });
-        if (res.ok) loadLeaderboard();
-        else if (res.status === 401) count.textContent = 'Sign in to press!';
-      } catch {}
-    }
-
-    document.getElementById('press-btn').addEventListener('click', press);
-    document.getElementById('leaderboard-press').addEventListener('click', press);
-    document.getElementById('leaderboard-retry').addEventListener('click', () => {
-      show('loading');
-      loadLeaderboard();
-    });
-
-    loadLeaderboard();
-  </script>
+  <script src="/app.js"></script>
 </body>
 </html>

@@ -55,13 +55,27 @@ module.exports = {
         danger: token('danger'),
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
+        // The tier ladder: each tier's band, and its grade letter.
+        'band-s': token('band-s'),
+        'grade-s': token('grade-s'),
+        'band-a': token('band-a'),
+        'grade-a': token('grade-a'),
+        'band-b': token('band-b'),
+        'grade-b': token('grade-b'),
+        'band-c': token('band-c'),
+        'grade-c': token('grade-c'),
+        'band-d': token('band-d'),
+        'grade-d': token('grade-d'),
+        'band-f': token('band-f'),
+        'grade-f': token('grade-f'),
       },
       // The type scale: four sizes, and nothing in between.
       fontSize: {
         small: ['0.875rem', { lineHeight: '1.25rem' }],
         body: ['1rem', { lineHeight: '1.5rem' }],
-        heading: ['1.25rem', { lineHeight: '1.75rem', fontWeight: '600' }],
-        title: ['1.75rem', { lineHeight: '2.25rem', fontWeight: '700' }],
+        heading: ['1.25rem', { lineHeight: '1.75rem', fontWeight: '700' }],
+        // Large and tight: the list's name and the grades are the type that talks.
+        title: ['2.25rem', { lineHeight: '2.5rem', fontWeight: '800', letterSpacing: '-0.02em' }],
       },
     },
   },
