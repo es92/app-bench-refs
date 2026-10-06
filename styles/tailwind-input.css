@@ -29,30 +29,44 @@
  */
 @layer base {
   :root {
-    --ground: 250 250 249;    /* the page */
-    --surface: 255 255 255;   /* lists, cards, fields */
-    --raised: 245 245 244;    /* hovers, badges */
-    --fg: 28 25 23;           /* text */
-    --muted: 87 83 78;        /* secondary text */
-    --line: 231 229 228;      /* borders, dividers, skeletons */
-    --accent: 15 118 110;     /* the one accent */
-    --on-accent: 255 255 255; /* text on the accent */
-    --danger: 185 28 28;
+    /* Cool neutral greys, one ember accent, and a ladder that runs hot to cold. */
+    --ground: 250 250 250;    /* snow */
+    --surface: 255 255 255;
+    --raised: 241 241 242;
+    --fg: 24 24 27;           /* ink */
+    --muted: 82 82 91;
+    --line: 228 228 231;
+    --accent: 196 43 28;      /* ember: the primary action, and the S tier */
+    --on-accent: 255 255 255;
+    --danger: 176 24 40;
     --on-danger: 255 255 255;
-    --focus: 13 148 136;      /* the keyboard focus ring */
+    --focus: 196 43 28;
+    /* The heat ladder: S ember, A tangerine, B sand, C fog, D frost, F glacier. */
+    --heat-s: 196 43 28;   --on-heat-s: 255 255 255;
+    --heat-a: 242 122 54;  --on-heat-a: 24 24 27;
+    --heat-b: 247 196 128; --on-heat-b: 24 24 27;
+    --heat-c: 226 226 222; --on-heat-c: 24 24 27;
+    --heat-d: 164 205 236; --on-heat-d: 24 24 27;
+    --heat-f: 52 110 190;  --on-heat-f: 255 255 255;
   }
   .dark {
-    --ground: 12 10 9;
-    --surface: 28 25 23;
-    --raised: 41 37 36;
-    --fg: 245 245 244;
-    --muted: 168 162 158;
-    --line: 68 64 60;
-    --accent: 45 212 191;
-    --on-accent: 4 47 46;
-    --danger: 248 113 113;
-    --on-danger: 69 10 10;
-    --focus: 94 234 212;
+    --ground: 13 13 15;
+    --surface: 26 26 30;
+    --raised: 39 39 44;
+    --fg: 244 244 245;
+    --muted: 161 161 170;
+    --line: 52 52 58;
+    --accent: 240 100 74;
+    --on-accent: 20 10 8;
+    --danger: 255 120 130;
+    --on-danger: 60 6 12;
+    --focus: 240 100 74;
+    --heat-s: 232 84 60;   --on-heat-s: 24 24 27;
+    --heat-a: 236 128 64;  --on-heat-a: 24 24 27;
+    --heat-b: 214 170 110; --on-heat-b: 24 24 27;
+    --heat-c: 88 88 92;    --on-heat-c: 245 245 245;
+    --heat-d: 96 150 200;  --on-heat-d: 24 24 27;
+    --heat-f: 60 108 180;  --on-heat-f: 255 255 255;
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */
@@ -122,5 +136,59 @@
   .state-empty,
   .state-error {
     @apply flex flex-col items-center gap-2 px-4 py-8 text-center;
+  }
+}
+
+/* ── This app's components ────────────────────────────────────────────────
+ * Things to rank, the grades they are ranked into, the switch between your
+ * tiers and everyone's, and the sheet things open in.
+ */
+@layer components {
+  .tile {
+    @apply inline-flex min-h-11 min-w-11 max-w-full cursor-grab select-none items-center rounded-lg border border-line bg-surface px-3 py-2 text-left text-small font-medium text-fg
+      hover:bg-raised focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus;
+    touch-action: manipulation;
+    -webkit-touch-callout: none;
+  }
+  .tile-lifted {
+    @apply opacity-40;
+  }
+  .tile-ghost {
+    @apply pointer-events-none fixed left-0 top-0 z-50 ring-2 ring-focus;
+  }
+  .drop-active {
+    @apply bg-raised ring-2 ring-inset ring-focus;
+  }
+  /* A grade, set in the monospaced face like a scoreboard's digits. */
+  .grade {
+    @apply font-grade text-title font-bold leading-none;
+  }
+
+  .seg {
+    @apply inline-flex rounded-lg bg-raised p-1;
+  }
+  .seg-btn {
+    @apply min-h-11 rounded-md px-4 text-small font-semibold text-muted
+      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus;
+  }
+  .seg-btn[aria-pressed="true"] {
+    @apply bg-surface text-fg;
+  }
+
+  .sheet {
+    @apply w-full max-w-none border border-line bg-surface p-0 text-fg;
+    margin: auto auto 0;
+    max-height: 85vh;
+    border-radius: 1rem 1rem 0 0;
+  }
+  @media (min-width: 640px) {
+    .sheet {
+      margin: auto;
+      max-width: 28rem;
+      border-radius: 1rem;
+    }
+  }
+  .sheet::backdrop {
+    background: rgb(13 13 15 / 0.55);
   }
 }

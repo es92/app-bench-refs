@@ -55,13 +55,31 @@ module.exports = {
         danger: token('danger'),
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
+        // The heat ladder, S (ember) to F (glacier), and the text set on each.
+        'heat-s': token('heat-s'),
+        'on-heat-s': token('on-heat-s'),
+        'heat-a': token('heat-a'),
+        'on-heat-a': token('on-heat-a'),
+        'heat-b': token('heat-b'),
+        'on-heat-b': token('on-heat-b'),
+        'heat-c': token('heat-c'),
+        'on-heat-c': token('on-heat-c'),
+        'heat-d': token('heat-d'),
+        'on-heat-d': token('on-heat-d'),
+        'heat-f': token('heat-f'),
+        'on-heat-f': token('on-heat-f'),
+      },
+      // The grades' face: the system's monospace, with fallbacks for every
+      // platform. Everything else is the system sans.
+      fontFamily: {
+        grade: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Consolas', '"DejaVu Sans Mono"', 'monospace'],
       },
       // The type scale: four sizes, and nothing in between.
       fontSize: {
         small: ['0.875rem', { lineHeight: '1.25rem' }],
         body: ['1rem', { lineHeight: '1.5rem' }],
         heading: ['1.25rem', { lineHeight: '1.75rem', fontWeight: '600' }],
-        title: ['1.75rem', { lineHeight: '2.25rem', fontWeight: '700' }],
+        title: ['2rem', { lineHeight: '2.25rem', fontWeight: '800', letterSpacing: '-0.015em' }],
       },
     },
   },

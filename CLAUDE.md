@@ -100,22 +100,44 @@ tables you've marked private), etc.
 
 ## About Tier List
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+Rank things with friends. A tier list is a topic ("Bay Area restaurants");
+anyone can add things to it, and each person drags each thing into a tier
+from S down to F. Everyone sees three things: their own tiers, the crowd's
+(the average of everyone's votes), and, for any one thing, how each person
+voted on it.
 
 ## Design
 
 This app's look. The first real version fills in the blanks; every later
 change follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+The plan behind it (from the `frontend-design` skill, worked inside the
+kit). The subject is friends trading hot takes about what is good ("that
+taqueria is S tier"); the audience is a group on their phones; the job is to
+place a thing in one gesture and see where you stand against the crowd. The
+default tier-list look is a rainbow ladder; this one runs hot to cold
+instead, so a glance says how strongly a thing is loved.
+
+- **Palette:** five named colours. Ember (`accent`, 196 43 28 light /
+  240 100 74 dark) is the primary action and the S tier. Snow (`ground`),
+  ink (`fg`) and two cool greys (`muted`, `line`) are everything else. The
+  ladder (`heat-s` to `heat-f`) runs ember, tangerine, sand, fog, frost,
+  glacier, with its own text colour on each (`on-heat-*`), every pair at
+  4.5:1 or more in both looks.
+- **Signature element:** the heat ladder's grade blocks, a full-height block
+  per row with its letter in the monospaced face, like a scoreboard. The
+  ember S block is the one loud thing; things and fields stay neutral.
+- **Type:** system sans for everything people read, with `text-title` set
+  heavier and larger than the kit's (2rem, weight 800, slight negative
+  tracking) for the list's name. Grades use `font-grade`, the system
+  monospace with fallbacks (`ui-monospace`, SF Mono, Menlo, Consolas,
+  DejaVu Sans Mono), only for the big letters, never for small labels.
+  Sizes stay the kit's four.
+- **Components:** `tile` (a thing: tap to open, drag to place), `grade`,
+  `seg` and `seg-btn` (My tiers / Everyone), `sheet` (a `<dialog>`: a bottom
+  sheet on a phone, a centred panel from `sm`), plus the kit's own.
+- **Layout:** on a phone one board at a time; from `lg` your tiers and
+  everyone's side by side.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -137,6 +159,14 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- A tier is stored as a score so it averages: 5 = S, 4 = A, 3 = B, 2 = C,
+  1 = D, 0 = F (`tier_votes.tier`). The letters and colours live in the
+  client (`TIERS` in `public/app.js`).
+- Every vote is public inside the app on purpose: "how everyone voted on a
+  thing" is a feature. All three tables are public.
+- The crowd's tier for a thing is the rounded average of everyone's votes.
+- Only the person who added a thing can remove it (its votes go with it).
+- Staging seeds two "Staging demo:" lists ranked by five fake
+  `staging-demo-*` people. `?demo=1` adds, read-only, the viewer's own
+  placements on the restaurant list so the populated board can be seen; it
+  never writes them.
