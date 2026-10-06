@@ -468,6 +468,11 @@
   var drag = null;
   var HOLD_MS = 220;
   var SLOP = 6;
+  // A tap opens a thing on its click, never on pointerup: opening the sheet
+  // first would let that same click land on the sheet's backdrop and close
+  // it. The click a drag leaves behind is dispatched in the same task as the
+  // drop, so it is swallowed until that task ends.
+  var swallowClick = false;
 
   function dropTargetAt(x, y) {
     var node = document.elementFromPoint(x, y);
@@ -515,8 +520,12 @@
     if (d.ghost) d.ghost.remove();
     d.tile.classList.remove('tile-lifted');
     if (d.over) d.over.classList.remove('drop-active');
-    if (!commit) return;
-    if (!d.lifted) { openThing(d.itemId); return; }
+    if (!commit || !d.lifted) return;
+    // Held, then let go without moving: that was a long tap. Open it (a
+    // long press is never followed by a click, so the sheet stays open).
+    if (!d.moved) { openThing(d.itemId); return; }
+    swallowClick = true;
+    setTimeout(function () { swallowClick = false; }, 0);
     if (!d.over) return;
     var raw = d.over.dataset.dropTier;
     var score = raw === 'none' ? null : Number(raw);
@@ -541,7 +550,8 @@
       if (drag.touch || !drag.draggable) { endDrag(false); return; }
       lift();
     }
-    e.preventDefault();
+    if (Math.abs(dx) + Math.abs(dy) >= SLOP) drag.moved = true;
+    if (e.cancelable) e.preventDefault();
     moveGhost(e.clientX, e.clientY);
   });
   document.addEventListener('pointerup', function (e) {
@@ -551,12 +561,13 @@
   });
   document.addEventListener('pointercancel', function () { endDrag(false); });
   // Once a tile is lifted by a finger, the page must not scroll under it.
-  document.addEventListener('touchmove', function (e) { if (drag && drag.lifted) e.preventDefault(); }, { passive: false });
+  document.addEventListener('touchmove', function (e) { if (drag && drag.lifted && e.cancelable) e.preventDefault(); }, { passive: false });
   document.addEventListener('contextmenu', function (e) { if (drag && drag.touch) e.preventDefault(); });
-  // Keyboard: Enter or Space on a tile opens it (a click with no pointer).
+  // A click on a tile opens it: a tap, a mouse click, or Enter or Space.
   document.addEventListener('click', function (e) {
     var t = e.target.closest ? e.target.closest('.tile') : null;
-    if (t && e.detail === 0) openThing(Number(t.dataset.itemId));
+    if (swallowClick) { swallowClick = false; return; }
+    if (t) openThing(Number(t.dataset.itemId));
   });
 
   // ── Wiring ─────────────────────────────────────────────────────────────
