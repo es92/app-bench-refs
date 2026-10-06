@@ -55,13 +55,30 @@ module.exports = {
         danger: token('danger'),
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
+        // playful-tactile's second colour (one kind of thing: the S tier), the
+        // text on it, and the ink of the pressable lip.
+        pop: token('pop'),
+        'on-pop': token('on-pop'),
+        shade: token('shade'),
+      },
+      fontFamily: {
+        display: ['ui-rounded', 'system-ui', 'sans-serif'],
+      },
+      // Motion that answers what a person did (always used under motion-safe:).
+      keyframes: {
+        settle: { from: { transform: 'scale(0.95)' }, to: { transform: 'scale(1)' } },
+        'slide-in': { from: { opacity: '0', transform: 'translateY(8px)' }, to: { opacity: '1', transform: 'translateY(0)' } },
+      },
+      animation: {
+        settle: 'settle 150ms ease-out',
+        'slide-in': 'slide-in 200ms ease-out',
       },
       // The type scale: four sizes, and nothing in between.
       fontSize: {
-        small: ['0.875rem', { lineHeight: '1.25rem' }],
+        small: ['0.875rem', { lineHeight: '1.25rem', fontWeight: '500' }],
         body: ['1rem', { lineHeight: '1.5rem' }],
-        heading: ['1.25rem', { lineHeight: '1.75rem', fontWeight: '600' }],
-        title: ['1.75rem', { lineHeight: '2.25rem', fontWeight: '700' }],
+        heading: ['1.25rem', { lineHeight: '1.75rem', fontWeight: '700' }],
+        title: ['2rem', { lineHeight: '2.5rem', fontWeight: '800' }],
       },
     },
   },

@@ -29,30 +29,17 @@
  */
 @layer base {
   :root {
-    --ground: 250 250 249;    /* the page */
-    --surface: 255 255 255;   /* lists, cards, fields */
-    --raised: 245 245 244;    /* hovers, badges */
-    --fg: 28 25 23;           /* text */
-    --muted: 87 83 78;        /* secondary text */
-    --line: 231 229 228;      /* borders, dividers, skeletons */
-    --accent: 15 118 110;     /* the one accent */
-    --on-accent: 255 255 255; /* text on the accent */
-    --danger: 185 28 28;
-    --on-danger: 255 255 255;
-    --focus: 13 148 136;      /* the keyboard focus ring */
+    /* Tangerine (playful-tactile): energetic and sociable, for a group app. */
+    --ground: 255 248 241; --surface: 255 255 255; --raised: 254 237 222; --fg: 43 22 10;
+    --muted: 104 72 52; --line: 246 222 202; --accent: 194 65 12; --on-accent: 255 255 255;
+    --pop: 125 211 252; --on-pop: 12 74 110; --danger: 175 20 60; --on-danger: 255 255 255;
+    --focus: 194 65 12; --shade: 43 22 10;
   }
   .dark {
-    --ground: 12 10 9;
-    --surface: 28 25 23;
-    --raised: 41 37 36;
-    --fg: 245 245 244;
-    --muted: 168 162 158;
-    --line: 68 64 60;
-    --accent: 45 212 191;
-    --on-accent: 4 47 46;
-    --danger: 248 113 113;
-    --on-danger: 69 10 10;
-    --focus: 94 234 212;
+    --ground: 26 14 8; --surface: 41 24 15; --raised: 58 36 23; --fg: 255 244 235;
+    --muted: 214 184 160; --line: 84 56 38; --accent: 251 146 60; --on-accent: 67 20 7;
+    --pop: 125 211 252; --on-pop: 12 60 90; --danger: 251 113 133; --on-danger: 76 5 25;
+    --focus: 253 186 116; --shade: 0 0 0;
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */
@@ -122,5 +109,96 @@
   .state-empty,
   .state-error {
     @apply flex flex-col items-center gap-2 px-4 py-8 text-center;
+  }
+}
+
+/* ── Playful, tactile (.claude/skills/playful-tactile) ────────────────────
+ * The pressable lip is this look's one depth device: a solid shelf under
+ * anything you press, which it sinks into. These rules come after the kit's
+ * own and override shape and size, keeping its colours and focus ring.
+ */
+@layer components {
+  .btn-primary,
+  .btn-secondary {
+    @apply min-h-12 rounded-full px-6 font-semibold motion-safe:transition-transform motion-safe:duration-75;
+    box-shadow: 0 4px 0 rgb(var(--shade) / 0.3);
+  }
+  .btn-primary:active,
+  .btn-secondary:active {
+    transform: translateY(4px);
+    box-shadow: none;
+  }
+  .btn-secondary {
+    @apply border-2 border-line;
+  }
+  /* Something you tap as a whole: a smaller lip. */
+  .tap-card {
+    @apply rounded-2xl border-2 border-line bg-surface p-4 motion-safe:transition-transform motion-safe:duration-75;
+    box-shadow: 0 3px 0 rgb(var(--shade) / 0.12);
+  }
+  .tap-card:active {
+    transform: translateY(3px);
+    box-shadow: none;
+  }
+  /* A pill choice: unselected on raised, selected filled with the accent. */
+  .chip {
+    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-raised px-4 text-body font-medium text-fg
+      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus;
+  }
+  .chip[aria-pressed="true"],
+  .chip[aria-selected="true"] {
+    @apply bg-accent text-on-accent;
+  }
+
+  /* Surfaces: a 2px border and the round of their level. */
+  .field {
+    @apply min-h-12 rounded-2xl border-2 px-4;
+  }
+  .list {
+    @apply rounded-2xl border-2;
+  }
+
+  /* A thing to rank: tapped as a whole, so a tap card with its lip, sized
+     as a chip. Tap to open it; drag to place it. */
+  .tile {
+    @apply inline-flex min-h-11 min-w-11 max-w-full cursor-grab select-none items-center rounded-2xl border-2 border-line bg-surface px-3 py-2 text-left text-small font-semibold text-fg
+      motion-safe:transition-transform motion-safe:duration-75 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus;
+    box-shadow: 0 3px 0 rgb(var(--shade) / 0.12);
+    touch-action: manipulation;
+    -webkit-touch-callout: none;
+  }
+  .tile:active {
+    transform: translateY(3px);
+    box-shadow: none;
+  }
+  .tile-lifted {
+    @apply opacity-40;
+  }
+  .tile-ghost {
+    @apply pointer-events-none fixed left-0 top-0 z-50 border-accent;
+  }
+  .drop-active {
+    @apply bg-raised ring-2 ring-inset ring-accent;
+  }
+  /* A tier's badge: round, chunky, the S one in the pop colour. */
+  .badge {
+    @apply flex shrink-0 items-center justify-center rounded-full font-display font-extrabold;
+  }
+
+  .sheet {
+    @apply w-full max-w-none border-2 border-line bg-surface p-0 text-fg;
+    margin: auto auto 0;
+    max-height: 85vh;
+    border-radius: 1.5rem 1.5rem 0 0;
+  }
+  @media (min-width: 640px) {
+    .sheet {
+      margin: auto;
+      max-width: 28rem;
+      border-radius: 1.5rem;
+    }
+  }
+  .sheet::backdrop {
+    background: rgb(43 22 10 / 0.45);
   }
 }

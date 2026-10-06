@@ -100,22 +100,46 @@ tables you've marked private), etc.
 
 ## About Tier List
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+Rank things with friends. A tier list is a topic ("Bay Area restaurants");
+anyone can add things to it, and each person drags each thing into a tier
+from S down to F. Everyone sees three things: their own tiers, the crowd's
+(the average of everyone's votes), and, for any one thing, how each person
+voted on it.
 
 ## Design
 
 This app's look. The first real version fills in the blanks; every later
 change follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
-- **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+**Look: playful, tactile** (see `.claude/skills/playful-tactile`): saturated
+colour, round shapes by level, chunky pressable controls with a lip, and
+motion only in answer to what a person did.
+
+- **Palette:** Tangerine, from the skill's four, because this is a group
+  app about taste and arguing with friends: energetic and sociable. Accent
+  (orange) is the primary action and the selected state, always filled.
+  `pop` (sky) marks one kind of thing only: the S tier (its badge, its bar
+  in a thing's breakdown, and the top of the podium in the empty state).
+  Everything else is the warm neutrals. New tokens `pop`, `on-pop` and
+  `shade` (the lip's ink) are named in `tailwind.config.js`.
+- **Signature element:** the tier badges, round and chunky down the side of
+  the board, with S in the pop colour; and a podium of three rounded blocks
+  (drawn in inline SVG) in the empty and error states.
+- **Type:** `font-display` (`ui-rounded`, falling back to the system face)
+  for the list's name, headings and the tier letters. `text-title` 2rem
+  weight 800 with `tracking-tight`, `text-heading` weight 700, `text-body`,
+  `text-small` weight 500.
+- **Shape:** buttons, chips, badges, avatars and the toast `rounded-full`;
+  the board, things (tapped as a whole) and fields `rounded-2xl`; sheets
+  `rounded-3xl` (1.5rem). Surfaces have a 2px border in `border-line`.
+- **Pressable lip:** `btn-primary`, `btn-secondary` (4px) and things
+  (`tile`, 3px) sit on a solid shelf they sink into when pressed. It is the
+  only shadow in the app.
+- **Motion:** a placed thing settles (`animate-settle`, scale 95 to 100,
+  150ms); an added thing slides in (`animate-slide-in`, 8px, 200ms); always
+  under `motion-safe:`. Nothing moves on load except the loading pulse.
+- **Layout:** on a phone one board at a time, switched by two pill chips
+  (My tiers / Everyone); from `lg` both side by side.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -137,6 +161,14 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- A tier is stored as a score so it averages: 5 = S, 4 = A, 3 = B, 2 = C,
+  1 = D, 0 = F (`tier_votes.tier`). The letters and colours live in the
+  client (`TIERS` in `public/app.js`).
+- Every vote is public inside the app on purpose: "how everyone voted on a
+  thing" is a feature. All three tables are public.
+- The crowd's tier for a thing is the rounded average of everyone's votes.
+- Only the person who added a thing can remove it (its votes go with it).
+- Staging seeds two "Staging demo:" lists ranked by five fake
+  `staging-demo-*` people. `?demo=1` adds, read-only, the viewer's own
+  placements on the restaurant list so the populated board can be seen; it
+  never writes them.
