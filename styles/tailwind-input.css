@@ -18,60 +18,78 @@
  * bg-accent with text-on-accent, ...). :root is the light look, and .dark,
  * which the theme script in public/index.html sets on <html>, the dark one.
  *
- * Re-theme the app HERE: change the values, keep the names. The defaults
- * (warm greys, one teal accent) are a quiet starting point, not a look.
+ * RSS Reader: newsprint neutrals (a warm paper ground, white pages) and one
+ * accent, the burnt orange of the feed icon. The six tints colour each
+ * feed's monogram so a mixed list can be scanned by source.
  * Keep every text pair at 4.5:1 or more in both looks: fg and muted on
  * ground, surface and raised; accent and danger on ground and surface;
- * on-accent on accent; on-danger on danger.
- *
- * Adopting the native UI kit later? Point its --un-accent and
- * --un-accent-contrast at the accent and on-accent tokens.
+ * on-accent on accent; on-danger on danger; each tint-fg on its tint-bg.
  */
 @layer base {
   :root {
-    --ground: 250 250 249;    /* the page */
-    --surface: 255 255 255;   /* lists, cards, fields */
-    --raised: 245 245 244;    /* hovers, badges */
-    --fg: 28 25 23;           /* text */
-    --muted: 87 83 78;        /* secondary text */
-    --line: 231 229 228;      /* borders, dividers, skeletons */
-    --accent: 15 118 110;     /* the one accent */
+    --ground: 247 245 240;    /* the page: warm paper */
+    --surface: 255 255 255;   /* the list and the reading pane */
+    --raised: 238 235 228;    /* hovers, the selected row, badges */
+    --fg: 30 27 23;           /* text */
+    --muted: 102 94 84;       /* secondary text */
+    --line: 224 219 209;      /* borders, dividers, skeletons */
+    --accent: 184 62 12;      /* the one accent: feed-icon orange */
     --on-accent: 255 255 255; /* text on the accent */
-    --danger: 185 28 28;
+    --danger: 178 34 24;
     --on-danger: 255 255 255;
-    --focus: 13 148 136;      /* the keyboard focus ring */
+    --focus: 234 88 12;       /* the keyboard focus ring */
+    --scrim: 28 22 16;        /* behind a dialog */
+
+    --tint-1-bg: 254 228 210; --tint-1-fg: 150 48 14;
+    --tint-2-bg: 219 233 253; --tint-2-fg: 30 62 160;
+    --tint-3-bg: 218 241 224; --tint-3-fg: 22 96 50;
+    --tint-4-bg: 236 228 252; --tint-4-fg: 88 36 170;
+    --tint-5-bg: 210 240 237; --tint-5-fg: 15 90 85;
+    --tint-6-bg: 252 225 231; --tint-6-fg: 152 22 58;
   }
   .dark {
-    --ground: 12 10 9;
-    --surface: 28 25 23;
-    --raised: 41 37 36;
-    --fg: 245 245 244;
-    --muted: 168 162 158;
-    --line: 68 64 60;
-    --accent: 45 212 191;
-    --on-accent: 4 47 46;
+    --ground: 19 17 15;
+    --surface: 29 26 23;
+    --raised: 44 40 36;
+    --fg: 243 239 232;
+    --muted: 173 165 154;
+    --line: 64 58 52;
+    --accent: 251 146 60;
+    --on-accent: 50 19 4;
     --danger: 248 113 113;
     --on-danger: 69 10 10;
-    --focus: 94 234 212;
+    --focus: 253 186 116;
+    --scrim: 0 0 0;
+
+    --tint-1-bg: 72 34 14;  --tint-1-fg: 253 190 146;
+    --tint-2-bg: 25 39 78;  --tint-2-fg: 156 199 252;
+    --tint-3-bg: 21 56 35;  --tint-3-fg: 140 230 170;
+    --tint-4-bg: 48 30 84;  --tint-4-fg: 200 184 252;
+    --tint-5-bg: 15 56 53;  --tint-5-fg: 110 226 208;
+    --tint-6-bg: 78 22 38;  --tint-6-fg: 252 170 184;
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */
   [hidden]:where(:not([hidden="until-found"])) {
     display: none !important;
   }
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
 }
 
 /* ── Components ───────────────────────────────────────────────────────────
- * A small starting kit on the tokens. Use these rather than restyling the
- * same thing by hand, add to them sparingly, and change a component here
- * rather than one copy of it. Type: text-title, text-heading, text-body and
- * text-small (tailwind.config.js), nothing in between.
+ * A small kit on the tokens. Use these rather than restyling the same thing
+ * by hand, add to them sparingly, and change a component here rather than
+ * one copy of it. Type: text-title, text-heading, text-body and text-small
+ * (tailwind.config.js), nothing in between.
  */
 @layer components {
-  /* Buttons: one primary per screen, the rest secondary. At least 44 px
-     each way, so they are easy to tap. */
+  /* Buttons: one primary per screen, the rest secondary or quiet. At least
+     44 px each way, so they are easy to tap. */
   .btn-primary,
-  .btn-secondary {
+  .btn-secondary,
+  .btn-quiet {
     @apply inline-flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-lg px-4 text-body font-medium
       focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2
       focus-visible:ring-offset-ground disabled:cursor-not-allowed disabled:opacity-50;
@@ -82,17 +100,21 @@
   .btn-secondary {
     @apply border border-line bg-surface text-fg hover:bg-raised;
   }
+  /* No fill and no border: toolbar actions and icon buttons. */
+  .btn-quiet {
+    @apply px-3 text-fg hover:bg-raised;
+  }
+  .btn-icon {
+    @apply px-0;
+  }
 
-  /* Text inputs, selects and textareas: <input class="field">, 44 px tall.
-     The placeholder is a faint hint (muted at 60%), so an example such as
-     "5.0" never reads as a value somebody already typed in. */
+  /* Text inputs: <input class="field">, 44 px tall. */
   .field {
     @apply block min-h-11 w-full rounded-lg border border-line bg-surface px-3 py-2 text-body text-fg
       placeholder:text-muted/60 focus:outline-none focus:ring-2 focus:ring-focus;
   }
 
-  /* A grouped list: <ul class="list"> of <li class="list-row">. The usual
-     way to show several things; prefer it to a stack of cards. */
+  /* A grouped list: <ul class="list"> of <li class="list-row">. */
   .list {
     @apply divide-y divide-line overflow-hidden rounded-xl border border-line bg-surface;
   }
@@ -100,24 +122,12 @@
     @apply flex min-h-11 items-center gap-3 px-4 py-3;
   }
 
-  /* A card: one self-contained thing, usually something you tap. Most
-     screens need none. Never put a card inside a card or a .list. */
-  .card {
-    @apply rounded-xl border border-line bg-surface p-4;
-  }
-
   /* The label above a section: sentence case, never uppercase or tracked. */
   .section-label {
     @apply mb-2 px-1 text-small font-medium text-muted;
   }
 
-  /* The states of anything that loads data. Show exactly one at a time:
-     - loading: .skeleton shapes where the data will be, never a blank;
-     - empty, only when the load WORKED and found nothing: a title, one
-       sentence and the action that fills it;
-     - error, only when the load FAILED: what failed, what still works,
-       and a Retry button.
-     Never show the empty state while loading or for a failure. */
+  /* The states of anything that loads data. Show exactly one at a time. */
   .skeleton {
     @apply rounded-md bg-line motion-safe:animate-pulse;
   }
@@ -125,4 +135,161 @@
   .state-error {
     @apply flex flex-col items-center gap-2 px-4 py-8 text-center;
   }
+
+  /* A feed's monogram: its first letter on one of six tints. */
+  .avatar {
+    @apply inline-flex shrink-0 items-center justify-center rounded-md font-semibold leading-none;
+    background-color: rgb(var(--tint-1-bg));
+    color: rgb(var(--tint-1-fg));
+  }
+  .avatar[data-tint="2"] { background-color: rgb(var(--tint-2-bg)); color: rgb(var(--tint-2-fg)); }
+  .avatar[data-tint="3"] { background-color: rgb(var(--tint-3-bg)); color: rgb(var(--tint-3-fg)); }
+  .avatar[data-tint="4"] { background-color: rgb(var(--tint-4-bg)); color: rgb(var(--tint-4-fg)); }
+  .avatar[data-tint="5"] { background-color: rgb(var(--tint-5-bg)); color: rgb(var(--tint-5-fg)); }
+  .avatar[data-tint="6"] { background-color: rgb(var(--tint-6-bg)); color: rgb(var(--tint-6-fg)); }
+
+  /* The app's mark: the feed glyph on the accent. */
+  .brand-tile {
+    @apply inline-flex shrink-0 items-center justify-center rounded-lg bg-accent text-on-accent;
+  }
+
+  /* A row in the feeds list. */
+  .feed-row {
+    @apply flex min-h-11 w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-body text-fg hover:bg-raised
+      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus;
+  }
+  .feed-row[aria-current="true"] {
+    @apply bg-raised font-semibold;
+  }
+
+  /* A post in the list: source and time, headline, two lines of summary. */
+  .post-row {
+    @apply flex w-full flex-col gap-1 px-4 py-4 text-left hover:bg-raised/60
+      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus lg:px-5;
+  }
+  .post-row[aria-current="true"] {
+    @apply bg-raised;
+    box-shadow: inset 3px 0 0 rgb(var(--accent));
+  }
+  .post-title {
+    @apply font-serif text-body font-semibold text-fg;
+  }
+  .post-row[data-read="true"] .post-title {
+    @apply font-normal text-muted;
+  }
+
+  /* Unread / All. */
+  .segmented {
+    @apply inline-flex overflow-hidden rounded-lg border border-line bg-surface;
+  }
+  .segmented > button {
+    @apply min-h-11 min-w-11 px-4 text-small font-medium text-muted hover:text-fg
+      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-focus;
+  }
+  .segmented > button[aria-pressed="true"] {
+    @apply bg-raised text-fg;
+  }
+
+  /* The article preview, set like a printed page. */
+  .article-body {
+    @apply font-serif text-body text-fg;
+    line-height: 1.7;
+  }
+  .article-body > * + * { @apply mt-5; }
+  .article-body h3 { @apply mt-8 font-sans text-heading; }
+  .article-body h4 { @apply mt-6 font-sans text-body font-semibold; }
+  .article-body ul { @apply list-disc space-y-2 pl-6; }
+  .article-body ol { @apply list-decimal space-y-2 pl-6; }
+  .article-body li > * + * { @apply mt-2; }
+  .article-body blockquote { @apply border-l-4 border-accent pl-4 italic text-muted; }
+  .article-body pre { @apply overflow-x-auto rounded-lg bg-raised p-3 font-mono text-small; line-height: 1.5; }
+  .article-body code { @apply font-mono text-small; }
+  .article-body a { @apply text-accent underline decoration-1 underline-offset-2; overflow-wrap: anywhere; }
+  .article-body hr { @apply border-line; }
+
+  /* Bottom-of-screen notices. */
+  .toast {
+    @apply pointer-events-auto flex max-w-full items-center gap-3 rounded-xl bg-fg py-1 pl-4 pr-1 text-small text-ground shadow-lg;
+    min-height: 3rem;
+  }
+  .toast button {
+    @apply min-h-11 min-w-11 rounded-lg px-3 font-semibold text-ground underline-offset-2 hover:underline
+      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus;
+  }
+
+  /* Modal dialogs (<dialog>). */
+  .dialog {
+    @apply w-[calc(100%-2rem)] max-w-md rounded-2xl border border-line bg-surface p-5 text-fg shadow-xl;
+  }
+  .dialog::backdrop {
+    background: rgb(var(--scrim) / 0.5);
+  }
 }
+
+/* ── Layout ───────────────────────────────────────────────────────────────
+ * Phones show one screen at a time (the list, your feeds, or a post), set
+ * by data-screen on #app. From 1024 px the three sit side by side:
+ * feeds | posts | preview, each scrolling on its own.
+ */
+@layer components {
+  .shell { @apply min-h-screen; }
+  .pane-feeds { @apply min-h-screen bg-ground; }
+  .pane-list { @apply min-h-screen bg-surface; }
+  .pane-preview { @apply min-h-screen bg-surface; }
+}
+
+@media (max-width: 1023.98px) {
+  .shell[data-screen="list"] .pane-feeds,
+  .shell[data-screen="list"] .pane-preview,
+  .shell[data-screen="feeds"] .pane-list,
+  .shell[data-screen="feeds"] .pane-preview,
+  .shell[data-screen="post"] .pane-feeds,
+  .shell[data-screen="post"] .pane-list {
+    display: none;
+  }
+  .pane-list,
+  .pane-feeds,
+  .pane-preview {
+    margin-inline: auto;
+    max-width: 44rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .shell {
+    display: grid;
+    grid-template-columns: 17rem minmax(21rem, 25rem) minmax(0, 1fr);
+    height: 100vh;
+    min-height: 0;
+  }
+  .shell[data-layout="single"] {
+    grid-template-columns: 17rem minmax(0, 1fr);
+  }
+  .shell[data-layout="single"] .pane-preview {
+    display: none;
+  }
+  .pane-feeds,
+  .pane-list,
+  .pane-preview {
+    height: 100vh;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .pane-feeds { border-right: 1px solid rgb(var(--line)); }
+  .pane-list { border-right: 1px solid rgb(var(--line)); }
+}
+
+@media (min-width: 1280px) {
+  .shell {
+    grid-template-columns: 18rem minmax(22rem, 27rem) minmax(0, 1fr);
+  }
+  .shell[data-layout="single"] {
+    grid-template-columns: 18rem minmax(0, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .spin { animation: spin 0.9s linear infinite; }
+}
+@keyframes spin { to { transform: rotate(360deg); } }

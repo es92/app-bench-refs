@@ -56,6 +56,11 @@ module.exports = {
         'on-danger': token('on-danger'),
         focus: token('focus'), // the keyboard focus ring
       },
+      // Headlines and the article preview are set in a book serif, the
+      // app's newsprint signature; the controls stay in the system sans.
+      fontFamily: {
+        serif: ['Charter', '"Bitstream Charter"', '"Sitka Text"', 'Cambria', 'Georgia', 'serif'],
+      },
       // The type scale: four sizes, and nothing in between.
       fontSize: {
         small: ['0.875rem', { lineHeight: '1.25rem' }],

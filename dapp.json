@@ -1,6 +1,32 @@
 {
+  "description": "Follow your RSS feeds and read every unread post in one list.",
   "icon": {
     "emoji": "📰"
   },
-  "secrets": []
+  "secrets": [],
+  "tests": [
+    {
+      "id": "reader.unread-list",
+      "name": "Unread list shows posts from the demo feeds",
+      "path": "/?demo=1",
+      "expectSelector": "#post-list [data-post-id]",
+      "visual": true,
+      "impact": ["public/**", "styles/**", "tailwind.config.js", "server.js", "lib/server/**"]
+    },
+    {
+      "name": "A post opens as a preview with a link to the full article",
+      "path": "/?demo=1#post=1",
+      "expectText": "Open full article"
+    },
+    {
+      "name": "Your feeds lists the demo feeds with unread counts",
+      "path": "/?demo=1#screen=feeds",
+      "expectText": "Night Sky Notes"
+    },
+    {
+      "name": "A reader with no feeds is offered their first one",
+      "path": "/",
+      "expectText": "Follow your first feed"
+    }
+  ]
 }
