@@ -28,31 +28,33 @@
  * --un-accent-contrast at the accent and on-accent tokens.
  */
 @layer base {
+  /* "Crust and crumb": flour-white and warm greys, with one baked-crust
+     accent. Dark is the oven at night: near-black brown, golden crust. */
   :root {
-    --ground: 250 250 249;    /* the page */
-    --surface: 255 255 255;   /* lists, cards, fields */
-    --raised: 245 245 244;    /* hovers, badges */
-    --fg: 28 25 23;           /* text */
-    --muted: 87 83 78;        /* secondary text */
-    --line: 231 229 228;      /* borders, dividers, skeletons */
-    --accent: 15 118 110;     /* the one accent */
+    --ground: 250 246 239;    /* the page: flour on the bench */
+    --surface: 255 253 249;   /* lists, cards, fields */
+    --raised: 243 236 224;    /* hovers, badges, stat tiles */
+    --fg: 38 28 20;           /* text */
+    --muted: 105 89 74;       /* secondary text */
+    --line: 228 218 202;      /* borders, dividers, skeletons */
+    --accent: 166 73 22;      /* the one accent: baked crust */
     --on-accent: 255 255 255; /* text on the accent */
-    --danger: 185 28 28;
+    --danger: 180 35 24;
     --on-danger: 255 255 255;
-    --focus: 13 148 136;      /* the keyboard focus ring */
+    --focus: 196 98 38;       /* the keyboard focus ring */
   }
   .dark {
-    --ground: 12 10 9;
-    --surface: 28 25 23;
-    --raised: 41 37 36;
-    --fg: 245 245 244;
-    --muted: 168 162 158;
-    --line: 68 64 60;
-    --accent: 45 212 191;
-    --on-accent: 4 47 46;
+    --ground: 23 18 14;
+    --surface: 34 28 22;
+    --raised: 48 40 32;
+    --fg: 246 239 228;
+    --muted: 190 174 155;
+    --line: 70 59 48;
+    --accent: 236 158 92;
+    --on-accent: 40 20 6;
     --danger: 248 113 113;
-    --on-danger: 69 10 10;
-    --focus: 94 234 212;
+    --on-danger: 60 8 8;
+    --focus: 240 176 110;
   }
   /* el.hidden = true hides an element even when a class gives it a display
      (flex, the components below). */
@@ -125,4 +127,67 @@
   .state-error {
     @apply flex flex-col items-center gap-2 px-4 py-8 text-center;
   }
+
+  /* Bread Bot's own pieces. */
+
+  /* A bread choice: a radio drawn as a tile. The input itself covers the
+     whole tile (so the tap target is the tile, not a 1 px box) and draws
+     the border; the picture and the name sit on top and let taps through. */
+  .tile {
+    @apply relative flex min-h-11 flex-col items-center justify-center gap-1 rounded-xl px-2 py-3 text-center;
+  }
+  .tile-input {
+    @apply absolute inset-0 h-full w-full cursor-pointer appearance-none rounded-xl border border-line bg-surface
+      hover:bg-raised checked:border-2 checked:border-accent checked:bg-raised
+      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-ground;
+  }
+  .tile-art {
+    @apply pointer-events-none relative h-10 w-10 text-muted;
+  }
+  .tile-input:checked ~ .tile-art {
+    @apply text-accent;
+  }
+  .tile-name {
+    @apply pointer-events-none relative text-small font-medium text-fg;
+  }
+
+  /* A saved recipe in the strip at the top: tap to load it. */
+  .chip {
+    @apply flex min-h-11 shrink-0 items-center gap-3 rounded-xl border border-line bg-surface py-2 pl-2 pr-4 text-left
+      hover:bg-raised focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus;
+  }
+  .chip[aria-pressed="true"] {
+    @apply border-2 border-accent bg-raised;
+  }
+
+  /* A number with a minus and a plus either side of it. */
+  .stepper {
+    @apply flex items-stretch gap-2;
+  }
+  .stepper-btn {
+    @apply inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-line bg-surface text-fg
+      hover:bg-raised focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus
+      disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .stepper-value {
+    @apply min-h-11 w-full min-w-0 rounded-lg border border-line bg-surface px-2 text-center text-body font-semibold tabular-nums text-fg
+      focus:outline-none focus:ring-2 focus:ring-focus;
+  }
+
+  /* One headline fact about the bake: rise, oven, time. */
+  .stat {
+    @apply flex min-w-0 flex-col gap-1 rounded-xl bg-raised p-3;
+  }
+}
+
+/* The steppers' numbers are typed or stepped with the buttons beside them,
+   so the browser's own tiny spin arrows are hidden. */
+.stepper-value::-webkit-outer-spin-button,
+.stepper-value::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.stepper-value {
+  -moz-appearance: textfield;
+  appearance: textfield;
 }

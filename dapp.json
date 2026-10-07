@@ -1,6 +1,34 @@
 {
+  "name": "Bread Bot",
+  "description": "Pick a bread and loaf size, and get the grams, rise times and bake temperature.",
   "icon": {
     "emoji": "🥖"
   },
-  "secrets": []
+  "secrets": [],
+  "tests": [
+    {
+      "id": "calculator.default",
+      "name": "Calculator shows a sourdough recipe",
+      "path": "/",
+      "expectSelector": "#ingredients .list-row",
+      "expectText": "Bread flour",
+      "visual": true,
+      "impact": [
+        "public/**",
+        "styles/**",
+        "tailwind.config.js"
+      ]
+    },
+    {
+      "name": "A link opens the rye recipe",
+      "path": "/?bread=rye",
+      "expectText": "Rye flour"
+    },
+    {
+      "name": "Saved recipes show the staging demo recipes",
+      "path": "/?demo=1",
+      "expectSelector": "#saved-list .chip",
+      "expectText": "Staging demo: Weekend boule"
+    }
+  ]
 }

@@ -97,22 +97,25 @@ tables you've marked private), etc.
 
 ## About Bread Bot
 
-_(add a sentence or two of product context here so Claude Code has a
-shared understanding of what this app is for)_
+A bread calculator. The viewer picks a bread (sourdough, bagels, sourdough
+bagels, rye, sandwich loaf), sets the hydration, how many loaves and the
+dough weight of each, and gets the ingredients in grams, the rise times and
+the oven temperature and bake time, plus a step-by-step schedule. They can
+save a set-up to bake again; saved recipes are per person.
 
 ## Design
 
 This app's look. The first real version fills in the blanks; every later
 change follows it, and updates it when a request changes the look on purpose.
 
-- **Palette:** _(name the accent, any second colour and the neutrals, e.g.
-  "accent: tomato red; second: basil green; neutrals: warm greys")_
-- **Signature element:** _(the one thing on screen drawn from this app's
-  subject, which no other app would have)_
+- **Palette:** "crust and crumb". Accent: baked-crust brown (golden crust
+  in the dark look). Neutrals: flour-white and warm browns. No second colour.
+- **Signature element:** the bread line drawings (boule, bagel, seeded
+  sourdough bagel, scored rye oval, pan loaf) in `ART` in `public/app.js`,
+  used on the bread picker, the recipe header and the saved recipes.
 - **Type scale:** `text-title`, `text-heading`, `text-body`, `text-small`
-  _(change their sizes in `tailwind.config.js` if you must, not their number)_
-- **One fixed look:** _(only for an app drawn as its own scene, such as a
-  game: which look, and why. Otherwise delete this line.)_
+  _(change their sizes in `tailwind.config.js` if you must, not their number)_.
+  The app's name is set in the serif family; everything else is the sans.
 
 The kit is in `styles/tailwind-input.css`: colour tokens with a light and
 a dark value (named in `tailwind.config.js`), and a few components
@@ -137,6 +140,15 @@ Re-theme by changing the token values there, keeping every text pair at
 
 ## App-specific conventions
 
-_(optional — e.g. "all currency values stored as integer cents, not
-floats"; "the `posts` table is append-only"; "avoid adding new
-dependencies"; etc.)_
+- The calculator runs in the page and never waits on the API: the formulas
+  are `BREADS` in `public/app.js`. Each ingredient is a share of the total
+  flour; starters are fed 1:1 and the hydration counts their water and
+  flour ("true" hydration). Keep `BREAD_KEYS` in `server.js` in step.
+- A saved recipe stores only its inputs (bread, hydration, count, grams per
+  loaf), never the computed grams, so a formula fix reaches every saved one.
+- `saved_recipes` is marked `staging:private` because each person's list is
+  theirs alone in the UI. Staging shows demo recipes only with `?demo=1`
+  (request-time, never written to the database).
+- Ingredient rows are rounded so they add up to exactly count × size: small
+  amounts to a tenth of a gram, the rest to whole grams.
+- Times assume a kitchen around 75°F (24°C); the page says so.

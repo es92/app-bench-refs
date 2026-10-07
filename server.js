@@ -145,7 +145,11 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get('/health', (_req, res) => res.json({ status: 'ok' }));
+let shuttingDown = false;
+app.get('/health', (_req, res) => {
+  if (shuttingDown) return res.status(503).json({ status: 'shutting_down' });
+  res.json({ status: 'ok' });
+});
 
 // The template ships no favicon file; index.html carries an inline SVG
 // icon instead. Answer 204 here so anything that still probes
@@ -153,6 +157,156 @@ app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 // the auth-gated catch-all and surface a 401 in the console on every
 // fresh load.
 app.get('/favicon.ico', (_req, res) => res.status(204).end());
+
+// ── Saved recipes ─────────────────────────────────────────────────────────
+// The calculator itself runs in the page (public/app.js): it needs nothing
+// from the server and keeps working when the API does not. The server keeps
+// one thing, each person's saved recipes, so a bake they liked is one tap
+// away next time. A saved recipe is only the four inputs; the page works
+// the grams and times out again, so a later fix to a formula reaches every
+// saved recipe too.
+
+// The five breads the page knows. Keep in step with BREADS in public/app.js.
+const BREAD_KEYS = new Set(['sourdough', 'bagels', 'sourdough-bagels', 'rye', 'sandwich']);
+const MAX_SAVED = 100;
+
+// Schema, applied idempotently. Memoised so every request waits for the
+// same attempt, and reset on failure so a database that was briefly down
+// is retried by the next request instead of breaking the app until reboot.
+let schemaReady = null;
+function ensureSchema() {
+  if (!schemaReady) {
+    schemaReady = (async () => {
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS saved_recipes (
+          id SERIAL PRIMARY KEY,
+          user_id TEXT NOT NULL,
+          username TEXT,
+          name TEXT NOT NULL,
+          bread TEXT NOT NULL,
+          hydration INTEGER NOT NULL,
+          loaves INTEGER NOT NULL,
+          loaf_grams INTEGER NOT NULL,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        )`);
+      await pool.query(`CREATE INDEX IF NOT EXISTS saved_recipes_user_idx
+        ON saved_recipes (user_id, created_at DESC)`);
+      // Each person's list is theirs alone in the app, so a staging copy
+      // gets the table's shape and none of its rows.
+      await pool.query(`COMMENT ON TABLE saved_recipes IS 'staging:private'`);
+    })().catch((err) => {
+      schemaReady = null;
+      throw err;
+    });
+  }
+  return schemaReady;
+}
+
+function toRecipe(row) {
+  return {
+    id: row.id,
+    name: row.name,
+    bread: row.bread,
+    hydration: row.hydration,
+    loaves: row.loaves,
+    loafGrams: row.loaf_grams,
+    createdAt: row.created_at,
+  };
+}
+
+// Staging demo recipes, added to the list only on a staging preview opened
+// with ?demo=1. Read-only and never written to the database: they belong to
+// nobody, cannot be removed, and say what they are in their names.
+const DEMO_RECIPES = [
+  { id: 'demo-1', name: 'Staging demo: Weekend boule', bread: 'sourdough', hydration: 78, loaves: 2, loafGrams: 900 },
+  { id: 'demo-2', name: 'Staging demo: Everything bagels', bread: 'bagels', hydration: 57, loaves: 8, loafGrams: 115 },
+  { id: 'demo-3', name: 'Staging demo: Deli rye', bread: 'rye', hydration: 70, loaves: 1, loafGrams: 1000 },
+  { id: 'demo-4', name: 'Staging demo: School-week sandwich bread', bread: 'sandwich', hydration: 64, loaves: 2, loafGrams: 800 },
+].map((r) => ({ ...r, demo: true, createdAt: null }));
+
+function intIn(value, min, max) {
+  const n = Number(value);
+  return Number.isInteger(n) && n >= min && n <= max ? n : null;
+}
+
+app.get('/api/recipes', async (req, res) => {
+  const demo = IS_STAGING && req.query.demo === '1' ? DEMO_RECIPES : [];
+  // A guest may look around but has nothing saved.
+  if (!req.user) return res.json({ recipes: demo, guest: true });
+  try {
+    await ensureSchema();
+    const { rows } = await pool.query(
+      `SELECT id, name, bread, hydration, loaves, loaf_grams, created_at
+         FROM saved_recipes WHERE user_id = $1
+        ORDER BY created_at DESC, id DESC`,
+      [String(req.user.id)]
+    );
+    res.json({ recipes: rows.map(toRecipe).concat(demo) });
+  } catch (err) {
+    console.error('[recipes] list failed', err.message);
+    res.status(500).json({ error: 'Could not load saved recipes' });
+  }
+});
+
+app.post('/api/recipes', async (req, res) => {
+  if (!req.user) return res.status(401).json({ error: 'account_required', action: 'save a recipe' });
+  const body = req.body || {};
+  const bread = BREAD_KEYS.has(body.bread) ? body.bread : null;
+  const hydration = intIn(body.hydration, 40, 100);
+  const loaves = intIn(body.loaves, 1, 48);
+  const loafGrams = intIn(body.loafGrams, 30, 3000);
+  const name = typeof body.name === 'string' ? body.name.trim().slice(0, 80) : '';
+  if (!bread || hydration == null || loaves == null || loafGrams == null || !name) {
+    return res.status(400).json({ error: 'That recipe is missing a bread, hydration, count or size.' });
+  }
+  try {
+    await ensureSchema();
+    const userId = String(req.user.id);
+    // Saving the same bake twice keeps one copy.
+    const same = await pool.query(
+      `SELECT id, name, bread, hydration, loaves, loaf_grams, created_at FROM saved_recipes
+        WHERE user_id = $1 AND bread = $2 AND hydration = $3 AND loaves = $4 AND loaf_grams = $5
+        LIMIT 1`,
+      [userId, bread, hydration, loaves, loafGrams]
+    );
+    if (same.rows.length) return res.json({ recipe: toRecipe(same.rows[0]), existing: true });
+    const count = await pool.query('SELECT COUNT(*)::int AS n FROM saved_recipes WHERE user_id = $1', [userId]);
+    if (count.rows[0].n >= MAX_SAVED) {
+      return res.status(409).json({ error: `You have ${MAX_SAVED} saved recipes. Remove one to save another.` });
+    }
+    const { rows } = await pool.query(
+      `INSERT INTO saved_recipes (user_id, username, name, bread, hydration, loaves, loaf_grams, created_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+       RETURNING id, name, bread, hydration, loaves, loaf_grams, created_at`,
+      [userId, req.user.username || null, name, bread, hydration, loaves, loafGrams, req.now]
+    );
+    res.status(201).json({ recipe: toRecipe(rows[0]) });
+  } catch (err) {
+    console.error('[recipes] save failed', err.message);
+    res.status(500).json({ error: 'Could not save the recipe' });
+  }
+});
+
+app.delete('/api/recipes/:id', async (req, res) => {
+  if (!req.user) return res.status(401).json({ error: 'account_required', action: 'remove a recipe' });
+  const id = intIn(req.params.id, 1, 2147483647);
+  if (id == null) return res.status(404).json({ error: 'No such saved recipe' });
+  try {
+    await ensureSchema();
+    const { rowCount } = await pool.query(
+      'DELETE FROM saved_recipes WHERE id = $1 AND user_id = $2',
+      [id, String(req.user.id)]
+    );
+    if (!rowCount) return res.status(404).json({ error: 'No such saved recipe' });
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('[recipes] remove failed', err.message);
+    res.status(500).json({ error: 'Could not remove the recipe' });
+  }
+});
+
+// Anything else under /api is a JSON 404, not the HTML page.
+app.all('/api/*', (_req, res) => res.status(404).json({ error: 'Not found' }));
 
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -191,10 +345,35 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+const DRAIN_MS = 3000;
+
 async function start() {
+  // Apply the schema on boot. The calculator never needs the database, so a
+  // database that is not ready yet only delays saved recipes: the next
+  // request retries the schema.
+  ensureSchema().catch((err) => console.error('[schema] not applied yet:', err.message));
+
   const server = app.listen(port, () => console.log(`Listening on :${port}`));
   // Let Envoy retire idle upstream connections at 60s, with a 15s margin.
   server.keepAliveTimeout = 75_000;
+
+  async function shutdown(signal) {
+    if (shuttingDown) return;
+    shuttingDown = true;
+    console.log(`[shutdown] ${signal} received, draining`);
+    server.close(() => {});
+    server.closeIdleConnections?.();
+    const t = setTimeout(() => server.closeAllConnections?.(), DRAIN_MS);
+    t.unref?.();
+    try {
+      await pool.end();
+    } catch (e) {
+      console.error('[shutdown] pool.end failed', e.message);
+    }
+    process.exit(0);
+  }
+  process.on('SIGTERM', () => shutdown('SIGTERM'));
+  process.on('SIGINT', () => shutdown('SIGINT'));
 }
 
 start().catch(err => { console.error(err); process.exit(1); });
